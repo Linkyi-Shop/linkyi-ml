@@ -42,8 +42,33 @@ def prepare_image(image, target_size=(64, 64)):
     """
     image = pad_and_resize_image(image, target_size)
     image = img_to_array(image)
+    image = image / 255.0
     image = np.expand_dims(image, axis=0)
     return image
+
+MAX_CLASS_PROBABILITY_THRESHOLD = 0.8
+MIN_BBOX_AREA_THRESHOLD = 0.3
+
+def is_image_rejected(class_probabilities, bounding_box, image_size=(224, 224)):
+    """
+    Determine if an image is accepted based on class probabilities and bounding box predictions.
+    """
+    # Check class probabilities
+    max_class_prob = np.max(class_probabilities)
+    if max_class_prob < MAX_CLASS_PROBABILITY_THRESHOLD:
+        return False # No Harmful object detected
+
+    # Check bounding box size
+    xmin, ymin, xmax, ymax = bounding_box
+    bbox_area = (xmax - xmin) * (ymax - ymin)
+    img_area = image_size[0] * image_size[1]
+
+    # print(bbox_area, img_area)
+    # Check if bounding box area is within acceptable range
+    if MIN_BBOX_AREA_THRESHOLD * img_area <= bbox_area:
+        return True  # Harmful object detected
+
+    return False
 
 def require_secret_key(f):
     @wraps(f)
@@ -72,12 +97,13 @@ def predict():
         image = Image.open(file)
         image = prepare_image(image, target_size=(224, 224))
         predictions = model.predict(image)
-        predictions_list = [pred.tolist() for pred in predictions]
+        predictions_list = [np.array(pred) for pred in predictions]
         # Get the max value from the second list of predictions
         max_prob = float(max(predictions[1][0]))
+        bbox = predictions_list[0][0]*224
 
         # Determine acceptance or rejection
-        if max_prob > 0.8:
+        if is_image_rejected(predictions_list[1][0], bbox):
             decision = 'reject'
         else:
             decision = 'accept'
