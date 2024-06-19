@@ -53,6 +53,10 @@ def require_secret_key(f):
         return f(*args, **kwargs)
     return decorated_function
 
+@app.route('/')
+def home():
+    return jsonify({'success': False, 'message': 'API under construction', 'data': []})
+
 @app.route('/predict', methods=['POST'])
 @require_secret_key
 def predict():
@@ -81,6 +85,11 @@ def predict():
         return jsonify({'prediction': predictions_list, 'max_probability': max_prob, 'decision': decision})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+        
+# Handle 404 errors
+@app.errorhandler(404)
+def page_not_found(e):
+    return jsonify({'success': False, 'message': 'Anda tersesat ayo kembali ke jalan yang benar', 'data': []}), 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
