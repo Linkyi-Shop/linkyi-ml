@@ -103,7 +103,7 @@ def predict():
         bbox = predictions[0][0]*224
 
         # Determine acceptance or rejection
-        if is_image_rejected(predictions_list[1][0], bbox):
+        if is_image_rejected(predictions[1][0], bbox):
             decision = 'reject'
         else:
             decision = 'accept'
