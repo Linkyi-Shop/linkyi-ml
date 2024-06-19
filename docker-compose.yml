@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  ml:
+    build: .
+    container_name: linkyi-ml
+    ports:
+      - "127.0.0.1:5011:5000"
+    volumes:
+      - .:/app
+    networks:
+      - linkyi-bridge
+
+networks:
+  linkyi-bridge:
+    driver: bridge
