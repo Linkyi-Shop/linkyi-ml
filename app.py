@@ -100,15 +100,19 @@ def predict():
         predictions_list = [np.array(pred) for pred in predictions]
         # Get the max value from the second list of predictions
         max_prob = float(max(predictions[1][0]))
-        bbox = predictions[0][0]*224
+        bbox = predictions_list[0][0]*224
 
         # Determine acceptance or rejection
-        if is_image_rejected(predictions[1][0], bbox):
+        if is_image_rejected(predictions_list[1][0], bbox):
             decision = 'reject'
         else:
             decision = 'accept'
 
-        return jsonify({'prediction': predictions_list, 'max_probability': max_prob, 'decision': decision})
+        # Convert predictions to list for JSON serialization
+        predictions_list_serializable = [pred.tolist() for pred in predictions_list]
+
+        return jsonify({'prediction': predictions_list_serializable, 'max_probability': max_prob, 'decision': decision})
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
