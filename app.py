@@ -100,7 +100,7 @@ def predict():
         predictions_list = [np.array(pred) for pred in predictions]
         # Get the max value from the second list of predictions
         max_prob = float(max(predictions[1][0]))
-        bbox = predictions_list[0][0]*224
+        bbox = predictions[0][0]*224
 
         # Determine acceptance or rejection
         if is_image_rejected(predictions_list[1][0], bbox):
@@ -111,7 +111,7 @@ def predict():
         return jsonify({'prediction': predictions_list, 'max_probability': max_prob, 'decision': decision})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-        
+
 # Handle 404 errors
 @app.errorhandler(404)
 def page_not_found(e):
